@@ -21,61 +21,61 @@ load_dotenv()
 
 API_KEY_GOOGLE = os.getenv('API_KEY_GOOGLE')
 
-def crearPrediccion():
+def crearPrediccion(event_url:str):
     # URL de la página de eventos de la UFC en Tapology
-    url = 'https://www.tapology.com/fightcenter?group=ufc'
+    # url = 'https://www.tapology.com/fightcenter?group=ufc'
 
-    paginaEventos = ClassSearch(url)
+    # paginaEventos = ClassSearch(url)
 
 
     # Seleccionar el primer enlace de evento que contenga "UFC"
-    result = selectFirstEventUFC(paginaEventos)
+    # result = selectFirstEventUFC(paginaEventos)
 
-    if result:
+    # if result:
 
-        # Construir URL del evento específico
-        event_url = "https://www.tapology.com/"+result.get("href")
+    # Construir URL del evento específico
 
-        eventoEspecifico = ClassSearch(event_url)
 
-        soupUFC = eventoEspecifico.soup
+    eventoEspecifico = ClassSearch(event_url)
+
+    soupUFC = eventoEspecifico.soup
+
+    nombreEvento = getNameEvent(soupUFC)
+
+    # Encontrar los contenedores de luchadores
     
-        nombreEvento = getNameEvent(soupUFC)
 
-        # Encontrar los contenedores de luchadores
+    data = soupUFC.find('div', {"id": "sectionFightCard"}) 
+
+    divs = data.find_all("li",{"class": "border-b border-dotted border-tap_6"})
+
+
+    peleas : str = ""
+    peleas_json = []  # Lista para almacenar cada JSON de pelea
+    inicio = time.time()
+    
+    for item in divs:
         
-
-        data = soupUFC.find('div', {"id": "sectionFightCard"}) 
-
-        divs = data.find_all("li",{"class": "border-b border-dotted border-tap_6"})
-
-
-        peleas : str = ""
-        peleas_json = []  # Lista para almacenar cada JSON de pelea
-        inicio = time.time()
+        peleador = item.find_all("a",{"class": "link-primary-red"})    
+        p1t = peleador[0].text.strip()
+        p2t = peleador[2].text.strip()
         
-        for item in divs:
-            
-            peleador = item.find_all("a",{"class": "link-primary-red"})    
-            p1t = peleador[0].text.strip()
-            p2t = peleador[2].text.strip()
-            
-            print("PELEADOR 1 -> ",p1t)
-            print("PELEADOR 2 -> ",p2t)
-            peleas += f'{p1t} VS {p2t}\n'
-            
-            # Llamadas a la API para obtener los JSON de cada peleador
-            p1 = get_fighter(p1t)
-            p2 = get_fighter(p2t)
-
-            # Agregar los JSON a la lista de peleas
-            peleas_json.append({"peleador1": p1, "peleador2": p2})
-
+        print("PELEADOR 1 -> ",p1t)
+        print("PELEADOR 2 -> ",p2t)
+        peleas += f'{p1t} VS {p2t}\n'
         
+        # Llamadas a la API para obtener los JSON de cada peleador
+        p1 = get_fighter(p1t)
+        p2 = get_fighter(p2t)
 
-            # Guardar peleas_json en un archivo llamado "peleas.json"
-            with open("peleas.json", "w") as archivo:
-                json.dump(peleas_json, archivo, indent=4, ensure_ascii=False)
+        # Agregar los JSON a la lista de peleas
+        peleas_json.append({"peleador1": p1, "peleador2": p2})
+
+    
+
+        # Guardar peleas_json en un archivo llamado "peleas.json"
+        with open("peleas.json", "w") as archivo:
+            json.dump(peleas_json, archivo, indent=4, ensure_ascii=False)
             
             
             
@@ -111,7 +111,7 @@ def crearPrediccion():
     fileJSON = genai.upload_file("peleas.json")
     # Configuración del modelo de IA
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+        model_name="gemini-1.5-pro",
         system_instruction=(PROMPT))
 
     # Generación del contenido
@@ -130,4 +130,4 @@ def crearPrediccion():
     convert_markdown_to_pdf("info.md", "Prediccion_"+nombreEvento)
 
 if __name__ == "__main__":
-    crearPrediccion()
+    crearPrediccion("https://www.tapology.com/fightcenter/events/116899-ufc-fight-night")

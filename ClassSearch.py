@@ -2,7 +2,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
-
+import chromedriver_autoinstaller
 class ClassSearch:
     def __init__(self,url):
         self.opts = Options()
@@ -15,8 +15,8 @@ class ClassSearch:
         self.opts.add_experimental_option('useAutomationExtension', False)
 
         self.url =url
-        self.service = Service('chromedriver.exe') 
-        self.driver = webdriver.Chrome(service=self.service,options=self.opts)
+        chromedriver_autoinstaller.install()
+        self.driver = webdriver.Chrome()
         
         self.driver.get(self.url)
         self.soup = BeautifulSoup(self.driver.page_source, 'html.parser')

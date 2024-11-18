@@ -6,6 +6,9 @@ import pdfkit
 from ClassSearch import ClassSearch
 import markdown2
 import pdfkit
+import speedtest
+from typing import List
+
 
 
 def selectFirstEventUFC(paginaEventos:ClassSearch):
@@ -57,5 +60,36 @@ def convert_markdown_to_pdf(markdown_file, pdf_file):
     # Convierte el HTML a PDF
     pdfkit.from_string(full_html, pdf_file, configuration=config)  # Cambiado a `full_html`
 
-def getNameEvent(soupUFC): return soupUFC.find('h2',{'class': "text-2xl md:text-2xl text-center font-bold text-tap_3"}).text
+def getNameEvent(soupUFC): return soupUFC.find('h2',{'class': "text-xl md:text-2xl text-center font-bold text-tap_3"}).text
+
+
+def speedServer() -> str:
+    st = speedtest.Speedtest()
+    d_st = st.download()
+    d = d_st//8e+6
+    u_st = st.upload()
+    u = u_st//8e+6
+    return f'Velocidad de subida de {d} MB\nVelocidad de descarga de {d} MB '
+
+def checkearPrediccionCreada():
+    url = 'https://www.tapology.com/fightcenter?group=ufc'
+
+    paginaEventos = ClassSearch(url)
+    
+    result = selectFirstEventUFC(paginaEventos)
+
+    if result:
+
+        # Construir URL del evento específico
+        event_url = "https://www.tapology.com/"+result.get("href")
+
+        eventoEspecifico = ClassSearch(event_url)
+
+        soupUFC = eventoEspecifico.soup
+    
+        nombreEvento = getNameEvent(soupUFC)
+        
+
+        return (parsearNombreParaElPDF("Prediccion_"+nombreEvento),event_url)
+            
 
