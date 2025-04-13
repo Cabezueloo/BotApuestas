@@ -1,2 +1,13 @@
 selenium
 beautifulsoup4
+telebot
+python-telegram-bot
+dotenv
+telegram
+ufc_api
+beautifulsoup4
+google-genai
+webdriver-manager
+chromedriver-autoinstaller
+pdfkit
+markdown2

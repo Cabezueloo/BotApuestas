@@ -58,10 +58,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 
-async def status(update: Update, context: ContextTypes.DEFAULT_TYPE,):
-    chat_id = update.effective_chat.id
 
-    await context.bot.send_message(chat_id=chat_id, text=f"Estado del servidor -> OK\n{speedServer()}")
 
 API_KEY_BOT = os.getenv('API_KEY_BOT')
 
@@ -81,7 +78,7 @@ if __name__ == "__main__":
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('Prediccion', sendPrediccion))
     application.add_handler(CommandHandler('cancel', cancel))
-    application.add_handler(CommandHandler('status', status))
+    
     
 
     # Inicia el bot
